@@ -24,5 +24,8 @@ class HomeBloc extends Bloc<HomeEvent, HomeState> {
     on<PreviousButtonEvent>((event, emit) async {
       emit(state.copyWith(selectIndex: event.count));
     });
+    on<EndQuestion>((event,emit)async{
+      emit(state.copyWith(end: event.end));
+    });
   }
 }

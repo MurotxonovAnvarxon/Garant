@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:untitled/data/question_data/question_data.dart';
@@ -19,11 +21,14 @@ class _HomeScreenState extends State<HomeScreen> {
     // TODO: implement dispose
     questionList = [];
     bloc.close();
+    timer?.cancel();
+
     super.dispose();
   }
 
   @override
   void initState() {
+    startTimer();
     // TODO: implement initState
     questionList = [
       QuestionData(
@@ -252,21 +257,67 @@ class _HomeScreenState extends State<HomeScreen> {
     ];
     super.initState();
   }
-
   final bloc = HomeBloc();
+  Timer? timer;
+
+  static const int initialTime = 1 * 60; // 5 minutes in seconds
+  int remainingTime = initialTime;
+  void startTimer() {
+    timer?.cancel();  // Clear any existing timer
+    timer = Timer.periodic(Duration(seconds: 1), (timer) {
+      if (remainingTime > 0) {
+        setState(() {
+          remainingTime--;
+        });
+      } else {
+        timer.cancel();
+        bloc.add(EndQuestion(end: true));
+
+      }
+    });
+  }
+
+  void resetTimer() {
+    timer?.cancel();
+    setState(() {
+      remainingTime = initialTime;
+    });
+  }
+
+  String formatTime(int seconds) {
+    int minutes = seconds ~/ 60;
+    int remainingSeconds = seconds % 60;
+    return '${minutes.toString().padLeft(2, '0')}:${remainingSeconds.toString().padLeft(2, '0')}';
+  }
 
   @override
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        // Return true to allow the app to exit
         return false;
       },
       child: Scaffold(
         body: BlocProvider.value(
           value: bloc,
           child: BlocConsumer<HomeBloc, HomeState>(
-            listener: (context, state) {},
+            listener: (context, state) {
+              if(state.end==true){
+                var x = questionList.length -
+                    (state.trueCount ?? 0) -
+                    (state.falseCount ?? 0);
+
+                Navigator.pushReplacement(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            ResultScreen(
+                                (state.trueCount ??
+                                    0),
+                                (state.falseCount ??
+                                    0) +
+                                    x)));
+              }
+            },
             builder: (context, state) {
               return SingleChildScrollView(
                 child: Column(
@@ -402,7 +453,7 @@ class _HomeScreenState extends State<HomeScreen> {
                               borderRadius:
                                   const BorderRadius.all(Radius.circular(20)),
                             ),
-                            child: const Row(
+                            child:  Row(
                               mainAxisAlignment: MainAxisAlignment.spaceAround,
                               children: [
                                 Icon(
@@ -411,7 +462,8 @@ class _HomeScreenState extends State<HomeScreen> {
                                   color: Colors.blue,
                                 ),
                                 Text(
-                                  "19:59",
+                                    formatTime(remainingTime),
+
                                   style: TextStyle(
                                     color: Colors.black,
                                     fontSize: 17,

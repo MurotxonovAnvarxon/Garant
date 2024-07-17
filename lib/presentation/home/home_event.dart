@@ -39,4 +39,10 @@ class BackButtonEvent extends HomeEvent{
   BackButtonEvent({required this.hasBack});
 }
 
+class EndQuestion extends HomeEvent{
+  final bool end;
+
+  EndQuestion({required this.end});
+}
+
 

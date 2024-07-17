@@ -10,11 +10,8 @@ class ResultScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Calculate the percentage of correct answers
     int totalCount = trueCount + falseCount;
     double percentage = (totalCount == 0) ? 0 : (trueCount / totalCount) * 100;
-
-    // Determine the color of the indicator based on the percentage
     Color indicatorColor;
     if (percentage >= 90) {
       indicatorColor = Colors.green;
@@ -26,7 +23,6 @@ class ResultScreen extends StatelessWidget {
 
     return WillPopScope(
       onWillPop: () async {
-        // Return true to allow the app to exit
         return false;
       },
       child: Scaffold(
